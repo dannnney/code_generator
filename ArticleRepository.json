@@ -1,0 +1,25 @@
+{
+    "type": "Action",
+    "subType": "DB",
+    "class": "ArticleRepository",
+    "methods": [{
+        "name": "findByUserId",
+        "params": [{
+            "name": "userId",
+            "type": "long"
+        }],
+        "returnType": "Array<ArticleEntity>",
+        "body": {
+            "dbType": "mysql",
+            "action": "select",
+            "condition": {
+                "and": [{
+                    "userId": {
+                        "equals": "@{this.userId}"
+                    }
+                }]
+            },
+            "table": "Article"
+        }
+    }]
+}

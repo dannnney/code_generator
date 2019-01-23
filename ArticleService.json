@@ -1,0 +1,179 @@
+{
+    "type": "Action",
+    "name": "ArticleService",
+    "objects": [{
+        "name": "articleRepository",
+        "type": "ArticleRepository"
+    }, {
+        "name": "executorService",
+        "type": "ExecutorService"
+    }, {
+        "name": "requestHolder",
+        "type": "RequestHolder"
+    }, {
+        "name": "articleMapper",
+        "type": "ArticleMapper"
+    }, {
+        "name": "starRepository",
+        "type": "StarRepository"
+    }],
+    "methods": [{
+        "name": "listByUserId",
+        "params": [{
+            "name": "userId",
+            "type": "long"
+        }],
+        "returnType": "Array<ArticleModel>",
+        "body": {
+            "states": [{
+                "findByUserId": {
+                    "op": "invoke",
+                    "action": {
+                        "object": "articleRepository",
+                        "method": "findByUserId",
+                        "args": ["@{this.userId}"],
+                        "returnName": "articleEntities"
+                    },
+                    "next": "newArticleModels"
+                }
+            }, {
+                "newArticleModels": {
+                    "op": "invoke",
+                    "action": {
+                        "method": "new",
+                        "type": "Array<ArticleModel>",
+                        "returnName": "articleModels"
+                    },
+                    "next": "forEachArticleEntities"
+                }
+            }, {
+                "forEachArticleEntities": {
+                    "op": "forEach",
+                    "action": {
+                        "items": "@{this.articleEntities}",
+                        "item": "articleEntity",
+                        "innerAction": "convertToArticleModel"
+                    },
+                    "next": "returnArticleModels"
+                }
+            }, {
+                "convertToArticleModel": {
+                    "op": "invoke",
+                    "action": {
+                        "object": "articleMapper",
+                        "method": "toModel",
+                        "args": ["@{this.articleEntity}"],
+                        "returnName": "articleModel"
+                    },
+                    "next": "addToArticleModels"
+                }
+            }, {
+                "addToArticleModels": {
+                    "op": "invoke",
+                    "action": {
+                        "object": "@{this.articleModels}",
+                        "method": "add",
+                        "args": ["@{this.articleModel}"]
+                    },
+                    "nextFunction": "fillArticleModel",
+                    "args": "@{this.articleModel}"
+                }
+            }, {
+                "returnArticleModels": {
+                    "op": "return",
+                    "action": {
+                        "result": "@{this.articleModels}"
+                    },
+                    "end": true
+                }
+            }]
+        }
+    }, {
+        "name": "fillArticleModel",
+        "params": [{
+            "name": "articleModel",
+            "type": "ArticleModel"
+        }],
+        "returnType": "void",
+        "body": {
+            "state": [{
+                "getUserId": {
+                    "op": "invoke",
+                    "action": {
+                        "returnName": "userId",
+                        "type": "long",
+                        "object": "@{this.requestHolder}",
+                        "method": "getUserId"
+                    },
+                    "next": "initStarCountFuture"
+                }
+            }, {
+                "initStarCountFuture": {
+                    "op": "invoke",
+                    "action": {
+                        "returnName": "starCountFuture",
+                        "object": "starRepository",
+                        "method": "countByTypeAndContentId",
+                        "args": ["ARTICLE", "@{articleModel.id}"],
+                        "async": true,
+                        "threadPool": "@{this.executorService}"
+                    },
+                    "next": "initStaredFuture"
+                }
+            }, {
+                "initStaredFuture": {
+                    "op": "invoke",
+                    "action": {
+                        "returnName": "staredFuture",
+                        "object": "starRepository",
+                        "method": "findByUserIdAndTypeAndContentId",
+                        "args": ["@{this.userId}", "ARTICLE", "@{articleModel.id}"],
+                        "async": true,
+                        "threadPool": "@{this.executorService}"
+                    },
+                    "next": "getStarCount"
+                }
+            }, {
+                "getStarCount": {
+                    "op": "invoke",
+                    "action": {
+                        "returnName": "starCount",
+                        "object": "@{this.starCountFuture}",
+                        "method": "get"
+                    },
+                    "next": "getStared"
+                }
+            }, {
+                "getStared": {
+                    "op": "invoke",
+                    "action": {
+                        "returnName": "stared",
+                        "object": "@{this.staredFuture}",
+                        "method": "get"
+                    },
+                    "next": "setStarCount"
+                }
+            }, {
+                "setStarCount": {
+                    "op": "invoke",
+                    "action": {
+                        "object": "@{this.articleModel}",
+                        "method": "setStarCount",
+                        "args": ["@{this.starCount}"]
+                    },
+                    "next": "setStared"
+                }
+            }, {
+                "setStared": {
+                    "op": "invoke",
+                    "action": {
+                        "object": "@{this.articleModel}",
+                        "method": "setStared",
+                        "args": ["@{this.stared}"]
+                    },
+                    "end": true
+                }
+            }]
+        }
+    }]
+}

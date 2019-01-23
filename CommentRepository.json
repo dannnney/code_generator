@@ -1,0 +1,44 @@
+{
+    "type": "Action",
+    "subType": "DB",
+    "class": "CommentRepository",
+    "methods": [{
+        "name": "findByArticleId",
+        "params": [{
+            "name": "type",
+            "type": "long"
+        }],
+        "returnType": "Array<CommentEntity>",
+        "body": {
+            "dbType": "mysql",
+            "action": "select",
+            "condition": {
+                "and": [{
+                    "articleId": {
+                        "equals": "@{this.articleId}"
+                    }
+                }]
+            },
+            "table": "Comment"
+        }
+    }, {
+        "name": "findByParentId",
+        "params": [{
+            "name": "type",
+            "type": "long"
+        }],
+        "returnType": "Array<CommentEntity>",
+        "body": {
+            "dbType": "mysql",
+            "action": "select",
+            "condition": {
+                "and": [{
+                    "parentId": {
+                        "equals": "@{this.parentId}"
+                    }
+                }]
+            },
+            "table": "Comment"
+        }
+    }]
+}

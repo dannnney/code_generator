@@ -1,0 +1,101 @@
+{
+    "type": "Action",
+    "subType": "DB",
+    "class": "StarRepository",
+    "methods": [{
+            "name": "getCountByTypeAndContentId",
+            "params": [{
+                "name": "type",
+                "type": "string"
+            }, {
+                "name": "contentId",
+                "type": "long"
+            }],
+            "returnType": "Long",
+            "body": {
+                "dbType": "mysql",
+                "action": "select",
+                "condition": {
+                    "and": [{
+                        "type": {
+                            "equals": "@{this.type}"
+                        }
+                    }, {
+                        "contentId": {
+                            "equals": "@{this.contentId}"
+                        }
+                    }]
+                },
+                "aggregation": "count",
+                "table": "Star"
+            }
+        }, {
+            "name": "findByUserIdAndTypeAndContentId",
+            "params": [{
+                "name": "userId",
+                "type": "long"
+            }, {
+                "name": "type",
+                "type": "string"
+            }, {
+                "name": "contentId",
+                "type": "long"
+            }],
+            "returnType": "StarEntity",
+            "body": {
+                "dbType": "mysql",
+                "action": "select",
+                "condition": {
+                    "and": [{
+                        "userId": {
+                            "equals": "@{this.userId}"
+                        }
+                    }, {
+                        "type": {
+                            "equals": "@{this.type}"
+                        }
+                    }, {
+                        "contentId": {
+                            "equals": "@{this.contentId}"
+                        }
+                    }]
+                },
+                "table": "Star"
+            }
+        },
+        {
+            "name": "deleteByUserIdAndTypeAndContentId",
+            "params": [{
+                "name": "userId",
+                "type": "long"
+            }, {
+                "name": "type",
+                "type": "string"
+            }, {
+                "name": "contentId",
+                "type": "long"
+            }],
+            "returnType": "void",
+            "body": {
+                "dbType": "mysql",
+                "action": "delete",
+                "condition": {
+                    "and": [{
+                        "userId": {
+                            "equals": "@{this.userId}"
+                        }
+                    }, {
+                        "type": {
+                            "equals": "@{this.type}"
+                        }
+                    }, {
+                        "contentId": {
+                            "equals": "@{this.contentId}"
+                        }
+                    }]
+                },
+                "table": "Star"
+            }
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "type": "Action",
+    "subType": "DB",
+    "class": "UserRepository",
+    "methods": [{
+        "name": "findByUsername",
+        "params": [{
+            "name": "username",
+            "type": "string"
+        }],
+        "returnType": "UserEntity",
+        "body": {
+            "dbType": "mysql",
+            "action": "select",
+            "condition": {
+                "and": {
+                    "username": {
+                        "equals": "@{this.username}"
+                    }
+                }
+            },
+            "table": "Star"
+        }
+    }]
+}
